@@ -4,6 +4,8 @@ A macOS menu bar app that keeps your microphone and speakers on the device you p
 
 Nothing leaves your Mac, and Automic needs no permissions: it changes the default devices and never opens an audio stream.
 
+<p align="center"><img src="docs/panel.png" width="340" alt="Automic's menu bar panel: the Automatic switching switch, output and input volume sliders, and the ranked Speakers and Headphones and Microphones lists"></p>
+
 ## Features
 
 - **Menu bar panel:** click the icon (a microphone with sound waves) for the **Automatic switching** switch, volume sliders for the current output and input, and both rankings: **Speakers and Headphones** and **Microphones**. The device in use has a blue badge. Click a device to use it now, drag it onto another row to take that row's place, or right-click for Use Now, Move to Top, Move Up, Move Down, Never Use Automatically and Forget Device. **Show disconnected and never-used devices** lists the rest, with when each was last seen.
