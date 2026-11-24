@@ -85,7 +85,7 @@ Inside the app:
 
 ## Releases
 
-To release, bump `CFBundleShortVersionString` in `Resources/Info.plist` and push the commit to `main`. [`release.yml`](.github/workflows/release.yml) sees a version that has no tag yet and runs tests, release build and smoke test, then publishes a GitHub Release titled `v<version>`, which also creates that tag, with `automic-<version>-macos-arm64.zip` (also the update archive), a `.dmg`, `SHA256SUMS` and the signed `appcast.xml`. Its notes are generated from the commits and also show in the update window. A push that changes `Info.plist` without a new version releases nothing.
+To release, bump `CFBundleShortVersionString` in `Resources/Info.plist` and push the commit to `main`. [`release.yml`](.github/workflows/release.yml) sees a version that has no tag yet and runs tests, release build and smoke test, then publishes a GitHub Release titled `v<version>`, which also creates that tag, with `automic-<version>-macos-arm64.zip` (also the update archive), a `.dmg`, `SHA256SUMS` and the signed `appcast.xml`. Its notes are generated from the commits and also show in the update window. A push that changes `Info.plist` or the workflow while the version already has its tag releases nothing; one that fixes the workflow after a failed release publishes the untagged version.
 
 Pushing a `vX.Y.Z` tag by hand releases that tag. Versions must look like `1.2.3`, or `1.2.3-beta.1` for a pre-release. Running the workflow by hand (Actions > release > Run workflow) builds the same files without publishing and attaches them to the run. `make app dist VERSION=1.2.3` produces them locally in `build/dist`.
 

@@ -1,8 +1,10 @@
 name: release
 
-# A push to main that bumps CFBundleShortVersionString in Resources/Info.plist
-# tests, builds, packages and publishes that version as a GitHub Release, and
-# tags it vX.Y.Z. Pushing a vX.Y.Z tag by hand does the same for that tag.
+# A push to main that changes Resources/Info.plist or this workflow while
+# CFBundleShortVersionString has no tag yet tests, builds, packages and
+# publishes that version as a GitHub Release, and tags it vX.Y.Z; with the tag
+# already there it does nothing. Pushing a vX.Y.Z tag by hand does the same
+# for that tag.
 # Running it manually (workflow_dispatch) builds the same artifacts and attaches
 # them to the run instead of publishing.
 #
@@ -27,9 +29,11 @@ on:
   push:
     branches:
       - main
-    # Only commits that may bump the version; tag pushes ignore path filters.
+    # Only commits that may bump the version, or fix this workflow after a
+    # failed release; tag pushes ignore path filters.
     paths:
       - Resources/Info.plist
+      - .github/workflows/release.yml
     tags:
       - "v*"
   workflow_dispatch:
@@ -76,6 +80,7 @@ jobs:
         id: version
         env:
           DRY_RUN: ${{ inputs.dry_run }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           build=true
           publish=false
@@ -85,19 +90,19 @@ jobs:
             if [[ "$GITHUB_EVENT_NAME" == push || "$DRY_RUN" == false ]]; then publish=true; fi
           elif [[ "$GITHUB_EVENT_NAME" == push ]]; then
             version="$(python3 -c 'import plistlib; print(plistlib.load(open("Resources/Info.plist", "rb"))["CFBundleShortVersionString"])')"
-            status=0
-            git ls-remote --exit-code --tags "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "refs/tags/v$version" >/dev/null || status=$?
-            case "$status" in
-              0)
-                echo "::notice::v$version is already tagged: Info.plist changed without a version bump, nothing to release"
-                build=false
-                ;;
-              2) publish=true ;;
-              *)
-                echo "::error::could not list the tags of $GITHUB_REPOSITORY (git ls-remote exited with $status)"
-                exit 1
-                ;;
-            esac
+            # Through the API with the job's token: an anonymous git ls-remote
+            # cannot read a private repository. matching-refs is a prefix match,
+            # so keep only the exact tag.
+            if ! tagged="$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/tags/v$version" --jq "[.[] | select(.ref == \"refs/tags/v$version\")] | length")"; then
+              echo "::error::could not list the tags of $GITHUB_REPOSITORY"
+              exit 1
+            fi
+            if [[ "$tagged" != 0 ]]; then
+              echo "::notice::v$version is already tagged: nothing to release"
+              build=false
+            else
+              publish=true
+            fi
           else
             version="0.0.0-dev.${GITHUB_SHA::7}"
           fi
