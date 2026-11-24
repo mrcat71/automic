@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard"
+  ],
+  "timezone": "Europe/Madrid",
+  "automerge": false,
+  "schedule": [
+    "before 4am on monday"
+  ],
+  "prCreation": "immediate",
+  "prHourlyLimit": 0,
+  "minimumReleaseAge": "7 days",
+  "minimumReleaseAgeBehaviour": "timestamp-required",
+  "internalChecksFilter": "none",
+  "pinDigests": true,
+  "labels": [
+    "dependencies",
+    "renovate"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "addLabels": ["github-actions", "ci"],
+      "groupName": "github-actions"
+    },
+    {
+      "matchManagers": ["swift"],
+      "addLabels": ["swift"],
+      "groupName": "swift dependencies (minor + patch)",
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "matchManagers": ["swift"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["swift", "major"],
+      "automerge": false
+    },
+    {
+      "description": "dmgbuild and its two libraries release together; update them as one",
+      "matchManagers": ["pip_requirements"],
+      "matchFileNames": [".github/dmg-requirements.txt"],
+      "addLabels": ["python"],
+      "groupName": "dmgbuild"
+    }
+  ]
+}
